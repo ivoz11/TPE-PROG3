@@ -36,7 +36,7 @@ public class Servicios2 {
 	 * Complejidad temporal: en el peor de los casos O(m^n)
 	 * donde m es el número de procesadores y n es el número de tareas.
 	 */
-	public Solucion backtracking(int tiempoMaximoNoRefrigerado) {
+	public void backtracking(int tiempoMaximoNoRefrigerado) {
 
 		Stack<Tarea> pilaTareas = new Stack<>();
 		List<Procesador> listaProcesadores = new ArrayList<>(procesadores.values());
@@ -47,14 +47,15 @@ public class Servicios2 {
 		Backtracking backtracking = new Backtracking(listaProcesadores);
 		Solucion mejorSolucionB = backtracking.resolver(tiempoMaximoNoRefrigerado, listaProcesadores, pilaTareas);
 
-		if(mejorSolucionB != null) {
-			return mejorSolucionB;
+		if(mejorSolucionB != null ) {
+			System.out.println(mejorSolucionB);
 		}else {
 			System.out.println("Tiempo máximo de ejecución: 0. No se encontró solución");
 		}
 		System.out.print("Métrica para analizar el costo de la solución (cantidad de candidatos considerados): ");
 		System.out.println(backtracking.getCantidadEstadosGenerados());
-		return mejorSolucionB;
+		
+		
 	}
 	/*
 	 * Método para resolver el problema utilizando el algoritmo de greedy.
@@ -66,7 +67,7 @@ public class Servicios2 {
 	 * Complejidad temporal: O(n * m)
 	 * donde n es el número de tareas y m es el número de procesadores.
 	 */
-	public Solucion greedy(int tiempoMaximoNoRefrigerado) {
+	public void greedy(int tiempoMaximoNoRefrigerado) {
 
 		List<Tarea> listaTareas = new ArrayList<>(tareas.values());
 		List<Procesador> listaProcesadores = new ArrayList<>(procesadores.values());
@@ -75,13 +76,12 @@ public class Servicios2 {
 		Solucion mejorSolucionG = greedy.resolver(tiempoMaximoNoRefrigerado, listaTareas);
 
 		if(mejorSolucionG != null) {
-			return mejorSolucionG;
+			System.out.println(mejorSolucionG);
 		}else {
 			System.out.println("Tiempo máximo de ejecución: 0. No se encontró solución");
 		}
 		System.out.print("Métrica para analizar el costo de la solución (cantidad de candidatos considerados): ");
 		System.out.println(greedy.getCantidadCandidatosConsiderados());
-		return mejorSolucionG;
 	}
 }
 

@@ -1,17 +1,11 @@
 package main;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-
-import utils.CSVReader;
 
 
 public class Main {
     public static void main(String[] args) {
         Servicios servicios = new Servicios("./src/datasets/Procesadores.csv", "./src/datasets/Tareas2.csv");
-        Servicios2 servicios2 = new Servicios2("./src/datasets/Procesadores.csv", "./src/datasets/Tareas.csv");
+        Servicios2 servicios2 = new Servicios2("./src/datasets/Procesadores.csv", "./src/datasets/Tareas2.csv");
 
         // Servicio 1: Dado un identificador de tarea obtener toda la información de la tarea asociada.
         System.out.println("==================== Servicio 1 ====================");
@@ -30,19 +24,16 @@ public class Main {
         System.out.println();
         
         // Backtracking
-        Solucion solucionB = servicios2.backtracking(10);
         // Imprimir la Solución Backtracking
         System.out.println("==================== Solución Backtracking ====================");
-        //System.out.println(solucionB);
+        servicios2.backtracking(200);
         System.out.println();
         
        
         // Greedy
-        Solucion solucionG = servicios2.greedy(10);
-        
         // Imprimir la Solución Greedy
         System.out.println("==================== Solución Greedy ====================");
-        System.out.println(solucionG);
+        servicios2.greedy(200);
         System.out.println();
   
     }

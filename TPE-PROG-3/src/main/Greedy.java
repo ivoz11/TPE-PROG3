@@ -20,10 +20,9 @@ public class Greedy {
     // Complejidad: O(n * m) donde n es el número de tareas y m es el número de procesadores
     public Solucion resolver(int tiempoMaximoNoRefrigerado, List<Tarea> listaTareas) {
     	
-    	Collections.sort(listaTareas);
+    	Collections.sort(listaTareas); // Se ordenan las tareas por tiempo de ejecucion ascendente
     	
-        // Inicializar las asignaciones y los tiempos de procesadores
-        while (!listaTareas.isEmpty()) {
+        while (!listaTareas.isEmpty()) { //Si tareas esta vacia, significa que las asigno todas
             Tarea mejorTarea = listaTareas.get(0);
             Procesador procesadorOptimo = this.getProcesadorOptimo(mejorTarea,tiempoMaximoNoRefrigerado);
             
@@ -31,8 +30,7 @@ public class Greedy {
             	  this.mejorSolucion.asignarTarea(procesadorOptimo, mejorTarea);
                   listaTareas.remove(mejorTarea);
             }else {
-            	
-            	return null;
+            	return null; //No hay una asignacion de tareas completa
             }
             this.cantidadCandidatosConsiderados++;
         }
@@ -40,17 +38,19 @@ public class Greedy {
         return mejorSolucion;
     }
     
-    private Procesador getProcesadorOptimo(Tarea t, int tiempoMaximoNoRefrigerado) {
+    private Procesador getProcesadorOptimo(Tarea tarea, int tiempoMaximoNoRefrigerado) {
+    	
     	Procesador procesadorOptimo = null;
     	
     	int menorTiempo = Integer.MAX_VALUE;
     	
-    	for(Procesador p : this.mejorSolucion.getAsignacion().keySet()) {
-    		int tiempoActual  = this.mejorSolucion.calcularTiempoEjecucionTareas(p);
+    	for(Procesador procesador : this.mejorSolucion.getAsignacion().keySet()) {
     		
-    		if(this.mejorSolucion.puedeAsignar(p, t, tiempoMaximoNoRefrigerado)&& tiempoActual < menorTiempo) {
+    		int tiempoActual  = this.mejorSolucion.calcularTiempoEjecucionTareas(procesador);
+    		
+    		if(this.mejorSolucion.puedeAsignar(procesador, tarea, tiempoMaximoNoRefrigerado)&& tiempoActual < menorTiempo) {
     			menorTiempo = tiempoActual;
-    			procesadorOptimo = p;
+    			procesadorOptimo = procesador;
     		}
     	}
     	return procesadorOptimo;
