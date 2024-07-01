@@ -1,7 +1,5 @@
 package main;
 
-import java.util.ArrayList;
-
 public class Procesador {
     private String id_procesador;
     private String codigo;
@@ -45,7 +43,8 @@ public class Procesador {
 
     public void setAnio(Integer anio) {
         this.anio = anio;
-    } 
+    }
+
     @Override
     public String toString() {
         return "\n\nProcesador [id_procesador=" + id_procesador + ", codigo=" + codigo + ", refrigerado="

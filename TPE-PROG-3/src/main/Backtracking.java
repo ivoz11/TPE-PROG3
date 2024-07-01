@@ -1,136 +1,66 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Stack;
 
 public class Backtracking {
-
+	
+	private Solucion mejorSolucion;
 	private int cantidadEstadosGenerados;
+	
 
 	public Backtracking() {
+		this.mejorSolucion = new Solucion();
 		this.cantidadEstadosGenerados = 0;
 	}
+
+	public Backtracking(List<Procesador> procesadores) {
+		this.mejorSolucion = new Solucion(procesadores);
+		this.cantidadEstadosGenerados = 0;
+	}
+
 	public int getCantidadEstadosGenerados() {
-		return cantidadEstadosGenerados;
+		return this.cantidadEstadosGenerados;
 	}
 
-	public Solucion resolver(int tiempoMaximoNoRefrigerados,ArrayList<Procesador>listaProcesadores,ArrayList<Tarea> listaTareas) {
-
-		int nroTareaActual = 0;
+	// Complejidad: en el peor de los casos O(m^n) donde m es el número de procesadores y n es el número de tareas
+	public Solucion resolver(int tiempoMaximoNoRefrigerados, List<Procesador> listaProcesadores, Stack<Tarea> pilaTareas) {
+		Solucion asignacionActual = new Solucion(listaProcesadores);
 		
-		Map<Procesador, List<Tarea>> asignacionInicial = new HashMap<>();
+		int cantTotalTareas = pilaTareas.size();
 
-		for (Procesador procesador : listaProcesadores) {
-			asignacionInicial.put(procesador, new ArrayList<>());
-		}
+		this.backtrackingAsignarTareas(tiempoMaximoNoRefrigerados, pilaTareas, listaProcesadores, asignacionActual,cantTotalTareas);
 
-		Solucion s = new Solucion(asignacionInicial,Integer.MAX_VALUE, 0); // Inicializamos con valores máximos para encontrar una solución mejor
-
-		backtrackingAsignarTareas(nroTareaActual,tiempoMaximoNoRefrigerados,listaTareas,listaProcesadores,asignacionInicial,s);
-
-		return s;
-
+		return this.mejorSolucion;
 	}
 
-	private void backtrackingAsignarTareas(int nroTareaActual,int tiempoMaximoNoRefrigerados,ArrayList<Tarea>listaTareas,ArrayList<Procesador>listaProcesadores, 
-			Map<Procesador, List<Tarea>>asignacionActual,Solucion mejorSolucion) {
-		
+	private void backtrackingAsignarTareas(int tiempoMaximoNoRefrigerados, Stack<Tarea> pilaTareas, List<Procesador> listaProcesadores,
+			Solucion asignacionActual,  int cantTotalTareas) {
+
 		this.cantidadEstadosGenerados++;
-		mejorSolucion.setCostoSolucion(this.cantidadEstadosGenerados);
-		
-		if(nroTareaActual == listaTareas.size()) {
 
-			int tiempoActual = calcularTiempoEjecucion(asignacionActual); //CALCULA EL TIEMPO DE EJECUCION ACTUAL
-
-			if(tiempoActual < mejorSolucion.getTiempoMaximo()) {
-				mejorSolucion.actualizarAsignacion(asignacionActual);
-				mejorSolucion.setTiempoMaximo(tiempoActual);
+		if (pilaTareas.empty()){
+			if (this.mejorSolucion == null || (this.mejorSolucion.getTiempoMaximo() > asignacionActual.getTiempoMaximo() && cantTotalTareas == asignacionActual.getCantTareasAsignadas())){
+				this.mejorSolucion.setAsignacion(asignacionActual);
 			}
+		} else {
+			Tarea tareaActual = pilaTareas.pop(); // Tomar la tarea actual de la lista de tareas y la borro
 
-
-		}else {
-			Tarea tareaActual = listaTareas.get(nroTareaActual); //Tomo la tarea a ctual de la lista de tareas 
-			
 			for (Procesador procesadorActual : listaProcesadores) {
-				//ESTABA ACA HOY TAREA ACTUAL
-				ArrayList<Tarea>tareasAsignadas = (ArrayList<Tarea>) asignacionActual.get(procesadorActual); //Tomo la lista de tareas que se le asigno hasta el momento
 
-				if(puedoAsignar(tareaActual,procesadorActual,tareasAsignadas,tiempoMaximoNoRefrigerados)) {
-					asignarTarea(tareaActual, procesadorActual, asignacionActual);//ASIGNA LA TAREA AL PROCESADOR
-					backtrackingAsignarTareas(nroTareaActual +1,tiempoMaximoNoRefrigerados,listaTareas,listaProcesadores,asignacionActual,mejorSolucion); //LLAMO RECURSIVAMENTE PARA LA SIGUIENTE TAREA
-					desasignarTarea(tareaActual, procesadorActual, asignacionActual); //DESASIGNA LA TAREA CUANDO REGRESA DE LA RECURSION
-				}
-			}
-		}
-	}
-	private int calcularTiempoEjecucion(Map<Procesador,List<Tarea>>asignacionActual) {
-		int maxTiempo = 0;
+				if (asignacionActual.puedeAsignar(procesadorActual, tareaActual, tiempoMaximoNoRefrigerados)) {
+					// Asignar la tarea al procesador
+					asignacionActual.asignarTarea(procesadorActual, tareaActual);
 
-		for(List<Tarea> tareas: asignacionActual.values()) {
-			int tiempoTotal = calcularTiempoTotal(tareas);
-			if(tiempoTotal > maxTiempo) {
-				maxTiempo = tiempoTotal;
-			}
-		}
-		return maxTiempo;
-	}
-
-
-	private void desasignarTarea(Tarea tarea, Procesador procesador, Map<Procesador, List<Tarea>> asignacionActual) {
-		asignacionActual.get(procesador).remove(tarea);
-	}
-	private void asignarTarea(Tarea tarea, Procesador procesador, Map<Procesador, List<Tarea>> asignacionActual) {
-		asignacionActual.get(procesador).add(tarea);
-
-	}
-	//VERIFICA SI SE PUEDE ASIGNAR UNA TAREA A UN PROCESADOR DADO LAS RESTRICCIONES
-	private boolean puedoAsignar(Tarea tarea, Procesador procesador,ArrayList<Tarea>tareasAsignadas, int tiempoMaximoNoRefrigerados) {
-
-		if(tareasAsignadas == null) tareasAsignadas = new ArrayList<>();
-
-		//VERIFICA SI EL PROCESADOR YA TIENE MAS DE DOS TAREAS CRITICAS ASIGNADAS
-		if (tieneMasDeDosTareasCriticas(tareasAsignadas)) {
-			return false;
-		}
-		//VERIFICA SI EL PROCESADOR ES REFRIGERADO
-		if (procesador.getRefrigerado()) {
-			return true;
-		}//SI ES NO REFRIGUERADO 
-		else {
-			//CALCULA EL TIEMPO TOTAL DE EJECUCION SI SE ANADE LA NUEVA TAREA
-			int tiempoTotal = calcularTiempoTotal(tareasAsignadas) + tarea.getTiempo();
-			return tiempoTotal <= tiempoMaximoNoRefrigerados; //VERIFICA SI EL TIEMPO TOTAL NO EXCEDE EL MAXIMO PERMITIDO SIN REFRIGERACION
-		}
-	}
-	
-	 public boolean tieneMasDeDosTareasCriticas(ArrayList<Tarea> tareasAsignadas) {
-			int cantidadTareasCriticas = 0;
-			for(Tarea tarea: tareasAsignadas) {
-				if(tarea.getCritica() == true) {
-					cantidadTareasCriticas++;
-					if(cantidadTareasCriticas >= 2) {
-						return true;
+					if ( this.mejorSolucion == null || (asignacionActual.getTiempoMaximo() < this.mejorSolucion.getTiempoMaximo())){
+						backtrackingAsignarTareas(tiempoMaximoNoRefrigerados,pilaTareas,listaProcesadores, asignacionActual,cantTotalTareas);
 					}
+					// Desasignar la tarea cuando regresa de la recursión
+					asignacionActual.desasignarTarea(procesadorActual,tareaActual);
 				}
 			}
-			return false;
+			pilaTareas.push(tareaActual);
 		}
-	
-	private int calcularTiempoTotal(List<Tarea> tareas) {
-		int tiempoTotal = 0;
-
-		for(Tarea t:tareas) {
-			tiempoTotal += t.getTiempo();
-		}
-		return tiempoTotal;
-	}
-
-	public String toString() {
-		return "Backtracking{" + super.toString() +
-				"Costo de la solución (cantidad de estados generados): " + cantidadEstadosGenerados +
-				'}';
 	}
 }
+
